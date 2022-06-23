@@ -3,17 +3,12 @@ Tic Tac Toe Player
 """
 
 import math
+from copy import deepcopy
 
 X = "X"
 O = "O"
 EMPTY = None
 
-
-def main():
-    board = (initial_state())
-    test = result(initial_state(), (0,0))
-    
-    print(test)
 
 def initial_state():
     """
@@ -65,8 +60,9 @@ def result(board, action):
     Returns the board that results from making move (i, j) on the board.
     """
     current_player = player(board)
-    board[action[0]][action[1]] = current_player
-    return(board)
+    newboard = deepcopy(board)
+    newboard[action[0]][action[1]] = current_player
+    return(newboard)
     raise NotImplementedError
 
 
@@ -136,10 +132,10 @@ def terminal(board):
 
 
 def utility(board):
-    winner = winner(board)
-    if winner == X:
+    local_winner = winner(board)
+    if local_winner == X:
         return(1)
-    if winner == O:
+    if local_winner == O:
         return(-1)
 
     return(0)
@@ -149,11 +145,37 @@ def utility(board):
 def minimax(board):
     current_player = player(board)
 
-    while 
-    
-    """
-    Returns the optimal action for the current player on the board.
-    """
-    raise NotImplementedError
+    def max_value(state):
+        v = -999
+        if terminal(state):
+            return utility(state)
+        for action in actions(state):
+            v = max(v, min_value(result(state, action)))
+        return v
 
-main()
+    def min_value(state):
+        v = 999
+        if terminal(state):
+            return utility(state)
+        for action in actions(state):
+            v = min(v, max_value(result(state,action)))
+        return v
+    
+    possible_actions = []
+
+    if current_player == X:
+        for action in actions(board):
+            action_value = min_value(result(board, action))
+            if action_value == 1:
+                return action
+            elif action_value == 0:
+                possible_actions.append(action)
+        return possible_actions[0]
+    if current_player == O:
+        for action in actions(board):
+            action_value = max_value(result(board, action))
+            if action_value == -1:
+                return action
+            elif action_value == 0:
+                possible_actions.append(action)
+        return possible_actions[0]
