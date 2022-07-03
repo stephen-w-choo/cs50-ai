@@ -1,0 +1,37 @@
+
+Given a state s
+
+The maximizing player picks action a in Actions(s) that produces the highest value of Min-Value(Result(s, a)).
+
+The minimizing player picks action a in Actions(s) that produces the lowest value of Max-Value(Result(s, a)).
+
+
+Function Max-Value(state)
+
+v = -∞
+
+if Terminal(state):
+
+​ return Utility(state)
+
+for action in Actions(state):
+
+​ v = Max(v, Min-Value(Result(state, action)))
+
+return v
+
+
+
+Function Min-Value(state):
+
+v = ∞
+
+if Terminal(state):
+
+​ return Utility(state)
+
+for action in Actions(state):
+
+​ v = Min(v, Max-Value(Result(state, action)))
+
+return v

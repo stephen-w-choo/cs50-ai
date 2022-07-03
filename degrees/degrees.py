@@ -92,7 +92,6 @@ def shortest_path(source, target):
     If no possible path, returns None.
 
     Pseudocode:
-    
     Initialise the frontier
     Add the source actor as the initial node in the frontier
         Node parent will be null
@@ -111,7 +110,7 @@ def shortest_path(source, target):
         if it does, return the node and all parent nodes
         break the loop
     Using the returned node, add each costar from the actions, add it to the frontier as a new node
-        Node parent will be the returned node
+        Node parent will be a pointer to the returned node
         node state will be the costar themselves
         node action will be all the costars
 
@@ -119,27 +118,23 @@ def shortest_path(source, target):
 
     # initialise the frontier
     search_frontier = QueueFrontier()  
-    target_node = Node(target, None, neighbors_for_person(target))
-    search_frontier.add(target_node)
+    source_node = Node(source, None, neighbors_for_person(source))
+    search_frontier.add(source_node)
 
-    for i in range(30):
-        if not search_frontier:
+    while True:
+        if search_frontier.empty():
             return None
         search_node = search_frontier.remove()
         for movie_star_pair in search_node.action:
-            if movie_star_pair[1] == source:
+            if movie_star_pair[1] == target:
                 path = []
                 path.append(movie_star_pair)
-                while search_node.state != target:
+                while search_node.state != source:
+                    path.insert(0, search_node.state)
                     search_node = search_node.parent
-                    path.append(search_node.state)
                 print(path)
                 return(path)
             search_frontier.add(Node(movie_star_pair, search_node, neighbors_for_person(movie_star_pair[1])))
-
-    return(None)
-
-
 
 def person_id_for_name(name):
     """
