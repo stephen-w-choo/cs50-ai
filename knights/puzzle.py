@@ -34,8 +34,8 @@ B has to be either a Knight or a Knave
 
 knowledge1 = And(
     Biconditional(AKnight, And(AKnave, BKnave)),
-    Or(AKnave, AKnight),
-    Or(BKnave, BKnight)
+    And(Or(AKnight, AKnave), Not(And(AKnight,AKnave))),
+    And(Or(BKnight, BKnave), Not(And(BKnight,BKnave))),
 )
 
 # Puzzle 2
@@ -44,8 +44,8 @@ knowledge1 = And(
 knowledge2 = And(
     Biconditional(AKnight, Or(And(AKnight,BKnight), And(AKnave,BKnave))),
     Biconditional(BKnight, Or(And(AKnight,BKnave), And(BKnight,AKnave))),
-    Or(AKnave, AKnight),
-    Or(BKnave, BKnight),
+    And(Or(AKnight, AKnave), Not(And(AKnight,AKnave))),
+    And(Or(BKnight, BKnave), Not(And(BKnight,BKnave))),
 )
 
 # Puzzle 3
@@ -56,18 +56,18 @@ knowledge2 = And(
 
 '''
 A saying 'I am a knave' is an obvious logical paradox, and can be represented as biconditional(AKnave, AKnight),
-an obviously false statement when we know that A cannot be both a Knave and a Knight: And(Or(AKnight, AKnave), Not(And(AKnight,AKnave))),
+an obviously false statement when we know that A cannot be both a Knave and a Knight.
 '''
 
 
 knowledge3 = And(
     Or(Biconditional(AKnight, AKnight), Biconditional(AKnave, AKnight)),
-    And(Or(AKnight, AKnave), Not(And(AKnight,AKnave))),
     Biconditional(BKnight,  Biconditional(AKnave, AKnight)),
     Biconditional(BKnight, CKnave),
     Biconditional(CKnight, AKnight),
-    Or(BKnave, BKnight),
-    Or(CKnight, CKnave)
+    And(Or(AKnight, AKnave), Not(And(AKnight,AKnave))),
+    And(Or(BKnight, BKnave), Not(And(BKnight,BKnave))),
+    And(Or(CKnight, CKnave), Not(And(CKnight,CKnave))),
 )
 
 
