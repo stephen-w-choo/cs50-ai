@@ -1,5 +1,6 @@
 import itertools
-import copy
+from copy import deepcopy
+from mimetypes import knownfiles
 import random
 
 
@@ -149,6 +150,13 @@ class MinesweeperAI():
         self.mines = set()
         self.safes = set()
 
+        # set to represent total set of cells
+        self.totalcells = set()
+        for i in range(8):
+            for j in range(8):
+                self.totalcells.add((i,j))
+        
+
         # List of sentences about the game known to be true
         self.knowledge = []
 
@@ -185,42 +193,86 @@ class MinesweeperAI():
             5) add any new sentences to the AI's knowledge base
                if they can be inferred from existing knowledge
         """
+        
+        # 1) mark the cell as a move that has been made
         self.moves_made.add(cell)
         
+        # 2) mark the cell as safe
         self.safes.add(cell)
         
+        # 3) add a new sentence to the AI's knowledge base based on 
+        # the value of `cell` and `count`
         adjacent_unknown_cells = set()
         for i in range(-1, 2):
             for j in range(-1, 2):
-                newcell = cell[0] + i, cell[1] + j
-                if (newcell) not in self.safes:
+                x, y = cell[0] + i, cell[1] + j
+                if x >= 0 and x < 8 and y >= 0 and y < 8:
+                    newcell = (x, y)
+                    if newcell in self.mines:
+                        count -= 1
+                        continue
+                    if newcell in self.safes:
+                        continue
                     adjacent_unknown_cells.add(newcell)
         self.knowledge.append(Sentence(adjacent_unknown_cells, count))
         
+        # 4) mark any additional cells as safe or as mines
+        # if it can be concluded based on the AI's knowledge base
         for sentence in self.knowledge:
-            sentence = sentence.copy()
-            local_mines = sentence.known_mines()
-            print(local_mines)
+            if not sentence.cells:
+                self.knowledge.remove(sentence)
+            else:
+                sentence_copy = deepcopy(sentence)
+                local_mines = sentence_copy.known_mines()
+                local_safes = sentence_copy.known_safes()
+                if local_mines:
+                    for mine in local_mines:
+                        self.mark_mine(mine)
+                    self.knowledge.remove(sentence)
+                elif local_safes:
+                    for safe in local_safes:
+                        self.mark_safe(safe)
+                    self.knowledge.remove(sentence)
+
+        # clear any empty sentences
+        for sentence in self.knowledge:
+            if not sentence.cells:
+                self.knowledge.remove(sentence)
+
+        # 5) add any new sentences to the AI's knowledge base
+        # if they can be inferred from existing knowledge
+
+        for i in range(len(self.knowledge)):
+            for j in range(len(self.knowledge)):
+                if self.knowledge[i] == self.knowledge[j]:
+                    continue
+                if self.knowledge[i].cells == self.knowledge[j].cells:
+                    continue
+                if self.knowledge[i].cells.issuperset(self.knowledge[j].cells):
+                    new_cells = self.knowledge[i].cells - self.knowledge[j].cells
+                    new_count = self.knowledge[i].count - self.knowledge[j].count
+                    self.knowledge[i] = Sentence(new_cells, new_count)
+                    continue
+                if self.knowledge[j].cells.issuperset(self.knowledge[i].cells):
+                    new_cells = self.knowledge[j].cells - self.knowledge[i].cells
+                    new_count = self.knowledge[j].count - self.knowledge[i].count
+                    self.knowledge[j] = Sentence(new_cells, new_count)
+                    continue
+
+        # 6) Adds any new information regarding known mines or safes based on
+        # updated knowledge base
+        for sentence in self.knowledge:
+            sentence_copy = deepcopy(sentence)
+            local_mines = sentence_copy.known_mines()
+            local_safes = sentence_copy.known_safes()
             if local_mines:
                 for mine in local_mines:
                     self.mark_mine(mine)
                 self.knowledge.remove(sentence)
-            local_safes = sentence.known_safes()
-            print(local_safes)
-            if local_safes:
+            elif local_safes:
                 for safe in local_safes:
                     self.mark_safe(safe)
                 self.knowledge.remove(sentence)
-        
-        knowledge_copy = self.knowledge.copy()
-        while knowledge_copy:
-            sentence_check = knowledge_copy.pop()
-            for sentence in knowledge_copy:
-                if sentence_check.cells.issubset(sentence):
-                    pass
-        
-
-
 
     def make_safe_move(self):
         """
@@ -231,7 +283,11 @@ class MinesweeperAI():
         This function may use the knowledge in self.mines, self.safes
         and self.moves_made, but should not modify any of those values.
         """
-        raise NotImplementedError
+        for cell in self.safes:
+            if cell not in self.moves_made:
+                return cell
+        
+        return(None)
 
     def make_random_move(self):
         """
@@ -240,4 +296,8 @@ class MinesweeperAI():
             1) have not already been chosen, and
             2) are not known to be mines
         """
-        raise NotImplementedError
+        for cell in (self.totalcells - self.mines - self.moves_made):
+            return(cell)
+
+        return(None)
+       
