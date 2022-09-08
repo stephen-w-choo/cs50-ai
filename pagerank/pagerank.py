@@ -4,7 +4,7 @@ import re
 import sys
 
 DAMPING = 0.85
-SAMPLES = 10
+SAMPLES = 10000
 
 
 def main():
@@ -59,12 +59,15 @@ def transition_model(corpus, page, damping_factor):
     """
     # the dictionary that will be returned
     res = {}
-    for page in corpus:
-        res[page] = (1 - damping_factor) / len(corpus)
-    # check the corpus for what the page links to
-    # the corpus is essentially an adjacency list
+
+    # the corpus is given as an adjacency list
+    # make a baseline weighting - evenly split due to the randomisation provided by the damping factor
+    for node in corpus:
+        res[node] = (1 - damping_factor) / len(corpus)
+
     page_links = corpus[page]
 
+    # then divide up the remaining weight between any links on that particular page
     for link in page_links:
         res[link] += damping_factor / len(page_links)
 
@@ -82,12 +85,8 @@ def sample_pagerank(corpus, damping_factor, n):
     """
     transitions = {}
     pages = corpus.keys()
-    print(corpus)
-    print(pages)
     for page in pages:
-        print(page)
         transitions[page] = transition_model(corpus, page, damping_factor)
-        print(transitions[page])
 
     def random_choice(probability_dictionary):
         # Takes a dictionary of probabilities that sum to 1 and returns a random page
@@ -117,6 +116,35 @@ def iterate_pagerank(corpus, damping_factor):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
+    page_num = len(corpus)
+    page_ranks = {}
+    for page in corpus:
+        page_ranks[page] = 1 / page_num
+    
+    def new_page_rank(page_rank_dict):
+        # Takes a dictionary of pages with associated pageranks and returns a new set of pageranks for the next iteration
+        # formula: PageRank(page) = ((1 - damping_factor) / page_num) + damping_factor * (sum of all (PageRank of pages that link to page)/(number of links of PageRank(i)) )
+        new_page_ranks = {}
+        
+        for page in corpus:
+            new_page_ranks[page] = (1 - damping_factor) / page_num
+        
+        for page in corpus:
+            list_of_links = corpus[page] # list of pages that this page links to
+            for page_link in list_of_links:
+                new_page_ranks[page_link] += 0.85 * (page_rank_dict[page] / len(list_of_links))
+
+        return new_page_ranks
+    
+    for i in range(SAMPLES):
+        page_ranks = new_page_rank(page_ranks)
+    print(page_ranks)
+    return page_ranks
+        
+    
+    
+
+
     raise NotImplementedError
 
 
