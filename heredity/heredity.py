@@ -1,5 +1,6 @@
 import csv
 import itertools
+from ntpath import join
 import sys
 
 PROBS = {
@@ -76,7 +77,6 @@ def main():
         # Loop over all sets of people who might have the gene
         for one_gene in powerset(names):
             for two_genes in powerset(names - one_gene):
-
                 # Update probabilities with new joint probability
                 p = joint_probability(people, one_gene, two_genes, have_trait)
                 update(probabilities, one_gene, two_genes, have_trait, p)
@@ -138,7 +138,83 @@ def joint_probability(people, one_gene, two_genes, have_trait):
         * everyone not in `one_gene` or `two_gene` does not have the gene, and
         * everyone in set `have_trait` has the trait, and
         * everyone not in set` have_trait` does not have the trait.
+
+        # for each person, calculate probability that
+        # they have
+    }
     """
+
+    """
+    for each person, calculate probability that
+    1. They have the specific number of genes that they have
+        if they have no known parents, get the PROBS["gene"] probability
+        else work it out from the number of genes that their parents have
+
+        1a. Working it out from the parents
+            if they have no copies of the gene
+                probability of parent passing no copies multiplied together
+            if they have 1 copy of the gene
+                probability of each parent passing 1 copy added together
+            if they have 2 copies
+                probability of both parents pasing 1 copy multiplied together
+    
+    2. They have the trait given a certain number of genes
+    """
+
+    # Calculates probability of having a trait given a number of genes
+    def trait_probability(person_gene_number):
+        if person in have_trait:
+            return PROBS["trait"][person_gene_number][True]
+        else:
+            return PROBS["trait"][person_gene_number][False]
+
+    # Takes a person and returns the no_of genes they are assumed to have 
+    def gene_no(person):
+        if person in one_gene:
+            return 1
+        elif person in two_genes:
+            return 2
+        else:
+            return 0
+
+    # Takes a person and return the probability that they have a certain number of genes
+    def gene_number_probability(person):
+        # dictionary of probabilities of passing the gene on given a number of genes
+        inheritance_probability = {
+            0: PROBS["mutation"],
+            1: 0.5,
+            2: (1 - PROBS["mutation"])
+        }
+
+        person_gene_number = gene_no(person)
+        father_inheritance_probability = inheritance_probability[gene_no(people[person]["father"])]
+        mother_inheritance_probability = inheritance_probability[gene_no(people[person]["mother"])]
+
+        # returns the baseline probability if no parents
+        if not people[person]["mother"] or not people[person]["father"]:
+            return PROBS["gene"][person_gene_number]
+        
+        # otherwise
+        # if they have no copies of the gene, probability of parents passing no copies multiplied
+        if person_gene_number == 0:
+            # only one case - both parents have to NOT pass on the gene
+            return (1 - father_inheritance_probability) * (1 - mother_inheritance_probability)
+        if person_gene_number == 1:
+            # case 1  - inherits from father
+            father_case = father_inheritance_probability * (1 - mother_inheritance_probability)
+            # case 2 - inherits from mother
+            mother_case = (1 - father_inheritance_probability) * mother_inheritance_probability
+            return father_case + mother_case
+        if person_gene_number == 2:
+            # only one case - both parents MUST pass on the gene
+            return father_inheritance_probability * mother_inheritance_probability
+
+    joint_prob_val = 1
+    for person in people:
+        person_prob_val = trait_probability(gene_no(person)) * gene_number_probability(person)
+        joint_prob_val = person_prob_val * joint_prob_val
+    
+    return joint_prob_val
     raise NotImplementedError
 
 
@@ -149,7 +225,23 @@ def update(probabilities, one_gene, two_genes, have_trait, p):
     Which value for each distribution is updated depends on whether
     the person is in `have_gene` and `have_trait`, respectively.
     """
-    raise NotImplementedError
+    # Takes a person and returns the no_of genes they are assumed to have 
+    def gene_no(person):
+        if person in one_gene:
+            return 1
+        elif person in two_genes:
+            return 2
+        else:
+            return 0
+
+    for person in probabilities:
+        person_gene_number = gene_no(person)
+        if person in have_trait:
+            trait = True
+        else:
+            trait = False
+        probabilities[person]["gene"][person_gene_number] += p
+        probabilities[person]["trait"][trait] += p
 
 
 def normalize(probabilities):
@@ -157,8 +249,20 @@ def normalize(probabilities):
     Update `probabilities` such that each probability distribution
     is normalized (i.e., sums to 1, with relative proportions the same).
     """
-    raise NotImplementedError
+    
+    for person in probabilities:
+        person_dict = probabilities[person]
+        person_gene_dict = person_dict["gene"]
+        gene_probability_total = sum(person_gene_dict.values())
+        for gene_no in person_gene_dict:
+            person_gene_dict[gene_no] = person_gene_dict[gene_no] / gene_probability_total
+        
+        person_trait_dict = person_dict["trait"]
+        trait_probability_total = sum(person_trait_dict.values())
+        for trait_presence in person_trait_dict:
+            person_trait_dict[trait_presence] = person_trait_dict[trait_presence] / trait_probability_total
 
 
 if __name__ == "__main__":
     main()
+    
