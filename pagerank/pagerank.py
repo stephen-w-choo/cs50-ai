@@ -104,8 +104,6 @@ def sample_pagerank(corpus, damping_factor, n):
     
     return count
 
-    raise NotImplementedError
-
 
 def iterate_pagerank(corpus, damping_factor):
     """
@@ -136,16 +134,21 @@ def iterate_pagerank(corpus, damping_factor):
 
         return new_page_ranks
     
-    for i in range(SAMPLES):
+    def compare_page_ranks(old_pr, new_pr):
+        if not old_pr or not new_pr:
+            return False
+        for page in old_pr:
+            if abs(old_pr[page] - new_pr[page]) > 0.001:
+                return False
+        return True
+    
+    old_page_ranks = None
+
+    while not compare_page_ranks(page_ranks, old_page_ranks):
+        old_page_ranks = page_ranks
         page_ranks = new_page_rank(page_ranks)
-    print(page_ranks)
+
     return page_ranks
-        
-    
-    
-
-
-    raise NotImplementedError
 
 
 if __name__ == "__main__":
