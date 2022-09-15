@@ -124,6 +124,8 @@ def iterate_pagerank(corpus, damping_factor):
         # formula: PageRank(page) = ((1 - damping_factor) / page_num) + damping_factor * (sum of all (PageRank of pages that link to page)/(number of links of PageRank(i)) )
         new_page_ranks = {}
         
+        if not corpus[page]
+
         for page in corpus:
             new_page_ranks[page] = (1 - damping_factor) / page_num
         

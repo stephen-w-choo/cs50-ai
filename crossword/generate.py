@@ -92,9 +92,7 @@ class CrosswordCreator():
         Enforce node and arc consistency, and then solve the CSP.
         """
         self.enforce_node_consistency()
-        print(self.domains)
         self.ac3()
-        print(self.domains)
         return self.backtrack(dict())
 
     def enforce_node_consistency(self):
@@ -120,15 +118,19 @@ class CrosswordCreator():
         """
         modified = False
 
-        overlaps = self.crossword.overlaps[x, y]
+        overlaps = self.crossword.overlaps[(x, y)]
         # overlap will be a tuple representing the character at which (x, y) overlap
         # they need to overlap at this specific character in order for the arc to be consistent
         
-        for word1 in set(self.domains[x]):
+        
+        for word1 in set(self.domains[x]): # iterate through a copy of the set
+            consistent = False
             for word2 in self.domains[y]:
-                if word1[overlaps[0]] != word2[overlaps[1]]:
-                    self.domains[x].remove(word1)
-                    modified = True
+                if word1[overlaps[0]] == word2[overlaps[1]]:
+                    consistent = True
+            if not consistent:
+                self.domains[x].remove(word1)
+                modified = True
         
         return modified
 
@@ -153,11 +155,12 @@ class CrosswordCreator():
         if not arcs:
             arc_queue = deque()
             for overlap in self.crossword.overlaps:
-                if overlap:
+                if self.crossword.overlaps[overlap]:
                     arc_queue.append(overlap)
         else:
             arc_queue = deque(arcs)
-
+        print("arcs")
+        print(arc_queue)
         while arc_queue:
             current_arc = arc_queue.popleft()
             x, y = current_arc
@@ -167,7 +170,7 @@ class CrosswordCreator():
             for z in self.crossword.neighbors(x):
                 if z == y:
                     continue
-                current_arc.append((z, x))
+                arc_queue.append((z, x))
 
         return True
 
@@ -178,8 +181,8 @@ class CrosswordCreator():
         """
 
         # assume that unassigned variables will have a value of None
-        for var in assignment:
-            if not assignment[var]:
+        for var in self.domains:
+            if var not in assignment or not assignment[var]:
                 return False
         
         return True
@@ -191,13 +194,12 @@ class CrosswordCreator():
 
         conditions:
         An assignment is consistent if 
-        all values are distinct 
-        every value is the correct length
-        there are no conflicts between neighboring variables
+        1 all values are distinct 
+        2 every value is the correct length
+        3 there are no conflicts between neighboring variables
         """
         # set to keep track of existing words to ensure distinct values
         seen = set()
-        
         # checks each variable
         for var in assignment:
             word = assignment[var]
@@ -207,10 +209,12 @@ class CrosswordCreator():
                 return False
 
         # checks overlaps for conflicts between variables
-        for variable_pair in self.crosswords.overlaps:
-            word1 = assignment[variable_pair[0]]
-            word2 = assignment[variable_pair[1]]
-            intersection = self.crosswords.overlaps[variable_pair]
+        for x, y in self.crossword.overlaps:
+            if x not in assignment or y not in assignment:
+                continue
+            word1 = assignment[x]
+            word2 = assignment[y]
+            intersection = self.crossword.overlaps[(x, y)]
             if intersection:
                 if word1[intersection[0]] != word2[intersection[1]]:
                     return False
@@ -224,7 +228,33 @@ class CrosswordCreator():
         The first value in the list, for example, should be the one
         that rules out the fewest values among the neighbors of `var`.
         """
-        raise NotImplementedError
+        """
+        TODO
+        
+        
+        
+
+        def count_consistent(value) # takes a word and tests for the number of val
+        # for each possible value in a variable domain
+        # make a copy of the assignment and check if it's consistent
+        """
+        neighbors = self.crossword.neighbors(var)
+
+        def count_consistent_vals(word):
+            # Takes a word/value and checks neighbors
+            ruled_out_count = 0
+            for neighbor_variable in neighbors: # check the neighbouring variables for overlaps
+                i, j = self.crossword.overlaps[(var, neighbor_variable)] # get the overlapping points
+                for word2 in self.domains[neighbor_variable]:
+                    if word[i] != word2[j]:
+                        ruled_out_count += 1
+            return ruled_out_count
+        
+        res = list(self.domains[var])
+
+        res.sort(key=count_consistent_vals)
+
+        return res
 
     def select_unassigned_variable(self, assignment):
         """
@@ -234,7 +264,23 @@ class CrosswordCreator():
         degree. If there is a tie, any of the tied variables are acceptable
         return values.
         """
-        raise NotImplementedError
+
+        min_vals_remaining = float('inf')
+        minvar = None
+
+        for variable in self.domains:
+            if variable not in assignment or not assignment[variable]:
+                vals_remaining = len(self.domains[variable])
+                
+                if vals_remaining == min_vals_remaining: # checks for a tie
+                    if len(self.crossword.neighbors(variable)) > len(self.crossword.neighbors(minvar)):
+                        minvar = variable
+                
+                if vals_remaining < min_vals_remaining: # checks for a lower num of remaining values
+                    min_vals_remaining = vals_remaining
+                    minvar = variable
+        
+        return minvar
 
     def backtrack(self, assignment):
         """
@@ -244,8 +290,31 @@ class CrosswordCreator():
         `assignment` is a mapping from variables (keys) to words (values).
 
         If no assignment is possible, return None.
+
+        if assignment complete:
+            return assignment
+        var = Select-Unassigned-Var(assignment, csp)
+        for value in Domain-Values(var, assignment, csp):
+            if value consistent with assignment:
+                add {var = value} to assignment
+                result = Backtrack(assignment, csp)
+                if result ≠ failure:
+                    return result
+                remove {var = value} from assignment
+        return failure
         """
-        raise NotImplementedError
+        if self.assignment_complete(assignment):
+            return assignment
+        variable = self.select_unassigned_variable(assignment)
+        for val in self.order_domain_values(variable, assignment): #val will represent each word
+            assignment[variable] = val
+            if self.consistent(assignment):
+                res = self.backtrack(assignment)
+                if res:
+                    return res # returns early if the assignment is complete
+            del assignment[variable] # otherwise backtracks and removes assigned var
+        
+        return False # returns false if none of the paths lead anywhere
 
 
 def main():
