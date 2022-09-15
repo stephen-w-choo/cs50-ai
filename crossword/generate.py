@@ -159,8 +159,6 @@ class CrosswordCreator():
                     arc_queue.append(overlap)
         else:
             arc_queue = deque(arcs)
-        print("arcs")
-        print(arc_queue)
         while arc_queue:
             current_arc = arc_queue.popleft()
             x, y = current_arc
@@ -179,7 +177,6 @@ class CrosswordCreator():
         Return True if `assignment` is complete (i.e., assigns a value to each
         crossword variable); return False otherwise.
         """
-
         # assume that unassigned variables will have a value of None
         for var in self.domains:
             if var not in assignment or not assignment[var]:
@@ -228,16 +225,7 @@ class CrosswordCreator():
         The first value in the list, for example, should be the one
         that rules out the fewest values among the neighbors of `var`.
         """
-        """
-        TODO
         
-        
-        
-
-        def count_consistent(value) # takes a word and tests for the number of val
-        # for each possible value in a variable domain
-        # make a copy of the assignment and check if it's consistent
-        """
         neighbors = self.crossword.neighbors(var)
 
         def count_consistent_vals(word):
@@ -248,6 +236,7 @@ class CrosswordCreator():
                 for word2 in self.domains[neighbor_variable]:
                     if word[i] != word2[j]:
                         ruled_out_count += 1
+
             return ruled_out_count
         
         res = list(self.domains[var])
