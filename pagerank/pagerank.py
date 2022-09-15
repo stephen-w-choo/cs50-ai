@@ -123,16 +123,18 @@ def iterate_pagerank(corpus, damping_factor):
         # Takes a dictionary of pages with associated pageranks and returns a new set of pageranks for the next iteration
         # formula: PageRank(page) = ((1 - damping_factor) / page_num) + damping_factor * (sum of all (PageRank of pages that link to page)/(number of links of PageRank(i)) )
         new_page_ranks = {}
-        
-        if not corpus[page]
-
         for page in corpus:
             new_page_ranks[page] = (1 - damping_factor) / page_num
         
         for page in corpus:
             list_of_links = corpus[page] # list of pages that this page links to
+
+            if not list_of_links: # if it doesn't link to any page, distribute its pagerank equally
+                for link in new_page_ranks:
+                    new_page_ranks[link] += damping_factor * (page_rank_dict[page] / len(page_rank_dict)) 
+
             for page_link in list_of_links:
-                new_page_ranks[page_link] += 0.85 * (page_rank_dict[page] / len(list_of_links))
+                new_page_ranks[page_link] += damping_factor * (page_rank_dict[page] / len(list_of_links))
 
         return new_page_ranks
     
@@ -146,7 +148,7 @@ def iterate_pagerank(corpus, damping_factor):
     
     old_page_ranks = None
 
-    while not compare_page_ranks(page_ranks, old_page_ranks):
+    while not compare_page_ranks(old_page_ranks, page_ranks):
         old_page_ranks = page_ranks
         page_ranks = new_page_rank(page_ranks)
 
