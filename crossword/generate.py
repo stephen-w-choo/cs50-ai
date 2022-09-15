@@ -122,7 +122,6 @@ class CrosswordCreator():
         # overlap will be a tuple representing the character at which (x, y) overlap
         # they need to overlap at this specific character in order for the arc to be consistent
         
-        
         for word1 in set(self.domains[x]): # iterate through a copy of the set
             consistent = False
             for word2 in self.domains[y]:
@@ -174,6 +173,7 @@ class CrosswordCreator():
 
         return True
 
+
     def assignment_complete(self, assignment):
         """
         Return True if `assignment` is complete (i.e., assigns a value to each
@@ -186,6 +186,7 @@ class CrosswordCreator():
                 return False
         
         return True
+
 
     def consistent(self, assignment):
         """
@@ -218,8 +219,9 @@ class CrosswordCreator():
             if intersection:
                 if word1[intersection[0]] != word2[intersection[1]]:
                     return False
-        
+
         return True
+
 
     def order_domain_values(self, var, assignment):
         """
@@ -227,16 +229,6 @@ class CrosswordCreator():
         the number of values they rule out for neighboring variables.
         The first value in the list, for example, should be the one
         that rules out the fewest values among the neighbors of `var`.
-        """
-        """
-        TODO
-        
-        
-        
-
-        def count_consistent(value) # takes a word and tests for the number of val
-        # for each possible value in a variable domain
-        # make a copy of the assignment and check if it's consistent
         """
         neighbors = self.crossword.neighbors(var)
 
@@ -251,10 +243,9 @@ class CrosswordCreator():
             return ruled_out_count
         
         res = list(self.domains[var])
-
         res.sort(key=count_consistent_vals)
-
         return res
+
 
     def select_unassigned_variable(self, assignment):
         """
@@ -279,8 +270,8 @@ class CrosswordCreator():
                 if vals_remaining < min_vals_remaining: # checks for a lower num of remaining values
                     min_vals_remaining = vals_remaining
                     minvar = variable
-        
         return minvar
+
 
     def backtrack(self, assignment):
         """
