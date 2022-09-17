@@ -205,6 +205,7 @@ class CrosswordCreator():
                 return False
             if len(word) != var.length:
                 return False
+            seen.add(word)
 
         # checks overlaps for conflicts between variables
         for x, y in self.crossword.overlaps:
@@ -227,10 +228,7 @@ class CrosswordCreator():
         The first value in the list, for example, should be the one
         that rules out the fewest values among the neighbors of `var`.
         """
-<<<<<<< HEAD
-=======
         
->>>>>>> 7af400a86442bfdea9c561f27658f1b6648cc724
         neighbors = self.crossword.neighbors(var)
 
         def count_consistent_vals(word):
