@@ -59,12 +59,29 @@ def load_data(filename):
     labels should be the corresponding list of labels, where each label
     is 1 if Revenue is true, and 0 otherwise.
     """
+    floats = {
+        "Administrative_Duration",
+        "Informational_Duration",
+        "ProductRelated_Duration",
+        "BounceRates",
+        "ExitRates",
+        "PageValues",
+        "SpecialDay",
+    }
 
-    csvfile = open('shopping.csv', newline='')
-    csv_reader = csv.DictReader(csvfile)
+    ints = {
+        "Administrative",
+        "Informational",
+        "ProductRelated",
+        "OperatingSystems",
+        "Browser",
+        "Region",
+        "TrafficType",
+    }
 
-    evidence = []
-    labels = []
+    bools = {
+        "Weekend",
+    }
 
     months = {
         "Jan": 0,
@@ -80,28 +97,33 @@ def load_data(filename):
         "Nov": 10,
         "Dec": 11
     }
-    
+
+    csvfile = open('shopping.csv', newline='')
+    csv_reader = csv.DictReader(csvfile)
+
+    evidence = []
+    labels = []
+
+   
+    count = 0
     for row in csv_reader:
         evidence_list = []
-        evidence_list.append(int(row["Administrative"]))
-        evidence_list.append(float(row["Administrative_Duration"]))
-        evidence_list.append(int(row["Informational"]))
-        evidence_list.append(float(row["Informational_Duration"]))
-        evidence_list.append(int(row["ProductRelated"]))
-        evidence_list.append(float(row["ProductRelated_Duration"]))
-        evidence_list.append(float(row["BounceRates"]))
-        evidence_list.append(float(row["ExitRates"]))
-        evidence_list.append(float(row["PageValues"]))
-        evidence_list.append(float(row["SpecialDay"]))
-        evidence_list.append(months[row["Month"]])
-        evidence_list.append(int(row["OperatingSystems"]))
-        evidence_list.append(int(row["Browser"]))
-        evidence_list.append(int(row["Region"]))
-        evidence_list.append(int(row["TrafficType"]))
-        evidence_list.append(int(row["VisitorType"] == "Returning_Visitor"))
-        evidence_list.append(int(row["Weekend"] == "TRUE"))
+        for category in row:
+            if category in ints:
+                evidence_list.append(int(row[category]))
+            elif category in floats:
+                evidence_list.append(float(row[category]))
+            elif category == "Month":
+                evidence_list.append(months[row[category]])
+            elif category == "VisitorType":
+                evidence_list.append(int(row[category] == "Returning_Visitor"))
+            elif category in bools:
+                evidence_list.append(int(row[category] == "TRUE"))
         evidence.append(evidence_list)
         labels.append(int(row["Revenue"] == "TRUE"))
+        if count == 0:
+            print(evidence, labels)
+        count += 1
 
     return(evidence, labels)
 
