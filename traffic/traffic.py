@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 EPOCHS = 10
 IMG_WIDTH = 30
 IMG_HEIGHT = 30
-NUM_CATEGORIES = 43
+NUM_CATEGORIES = 3
 TEST_SIZE = 0.4
 
 
@@ -57,8 +57,32 @@ def load_data(data_dir):
     numpy ndarray with dimensions IMG_WIDTH x IMG_HEIGHT x 3. `labels` should
     be a list of integer labels, representing the categories for each of the
     corresponding `images`.
+    
+    images = []
+    labels = []
+
+    Some pseudocode:
+    Loop through i in range(NUM_CATEGORIES):
+        go through data_dir/i:
+            cv2.imread each image in the directory, convert to array
+            make sure each array is 30, 30, 3
+            images.append(image_array)
+            labels.append(i)
+    
     """
-    raise NotImplementedError
+    images = []
+    labels = []
+
+    for i in range(NUM_CATEGORIES):
+        image_names = os.listdir(os.path.join(data_dir, str(i)))
+
+        for image_name in image_names:
+            img = cv2.imread(os.path.join(data_dir, str(i), image_name))
+            img = cv2.resize(img, (IMG_WIDTH, IMG_HEIGHT))
+            images.append(img)
+            labels.append(i)
+
+    return (images, labels)
 
 
 def get_model():
@@ -67,8 +91,11 @@ def get_model():
     `input_shape` of the first layer is `(IMG_WIDTH, IMG_HEIGHT, 3)`.
     The output layer should have `NUM_CATEGORIES` units, one for each category.
     """
-    raise NotImplementedError
-
+    model = tf.keras.Sequential([
+    tf.keras.layers.InputLayer(input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)),
+    tf.keras.layers.Dense(8)])
+    
+    return model
 
 if __name__ == "__main__":
     main()
