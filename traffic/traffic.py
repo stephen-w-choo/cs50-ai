@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 EPOCHS = 10
 IMG_WIDTH = 30
 IMG_HEIGHT = 30
-NUM_CATEGORIES = 3
+NUM_CATEGORIES = 41
 TEST_SIZE = 0.4
 
 
@@ -21,7 +21,6 @@ def main():
 
     # Get image arrays and labels for all image files
     images, labels = load_data(sys.argv[1])
-
     # Split data into training and testing sets
     labels = tf.keras.utils.to_categorical(labels)
     x_train, x_test, y_train, y_test = train_test_split(
@@ -91,9 +90,25 @@ def get_model():
     `input_shape` of the first layer is `(IMG_WIDTH, IMG_HEIGHT, 3)`.
     The output layer should have `NUM_CATEGORIES` units, one for each category.
     """
+
+    
+    # ReLu vs sigmoid activation functions:
+    # ReLU is a relatively simple function to calculate - MUCH faster than the exponents used in sigmoid functions
+    # ReLU has a much wider effective window - the steeper peak gradient of a sigmoid function means there's a much narrower effective window for the sigmoid function
+    # ReLU vs step function:
+    # gradient based functions are used for loss calculation - you can't calculate the gradient of a step function when it's 0 everywhere
+    
+    # syntax - keras.Sequential can take a list of keras layers
+    # the alternative would be to model.add each layer individually
     model = tf.keras.Sequential([
     tf.keras.layers.InputLayer(input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)),
-    tf.keras.layers.Dense(8)])
+    tf.keras.layers.Flatten(),
+    tf.keras.layers.Dense(NUM_CATEGORIES, activation="sigmoid")])
+    model.compile(
+        optimizer="adam",
+        loss="binary_crossentropy",
+        metrics=["accuracy"]
+    )
     
     return model
 
