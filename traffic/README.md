@@ -1,10 +1,10 @@
-ATTEMPT 1
+# ATTEMPT 1
 
-This was just a test to see if I got the syntax right. There are no deep layers here - the input layer gets flattened and passed straight into the output
+This was just a test to see if I got the syntax right. There are no deep layers here - the input layer gets flattened and passed straight into the output. This was done on the test set
 
 The accuracy is remarkable - even without any deep layers or convolution steps we went from a 0.33 accuracy to 0.8 - although in this case, we might be benefiting from the simplicity of the dataset, as well as the dataset being heavily weighted to category 1
 
-
+## Attempt 1 model
     model = tf.keras.Sequential([
     tf.keras.layers.InputLayer(input_shape=input_shape), # input layer - 3 dimensional array of width, height, RGB values
     tf.keras.layers.Flatten(), # flatten the inputs into a single dimension
@@ -16,7 +16,7 @@ The accuracy is remarkable - even without any deep layers or convolution steps w
     )
 
 
-
+## Attempt 1 results
 Epoch 1/10
 493/493 [==============================] - 1s 2ms/step - loss: 2.9468 - accuracy: 0.3652
 Epoch 2/10
@@ -40,9 +40,10 @@ Epoch 10/10
 329/329 - 0s - loss: 0.9789 - accuracy: 0.7973 - 477ms/epoch - 1ms/step
 
 
-ATTEMPT 2
+# ATTEMPT 2
 Let's try adding a convolution and a single deep layer
 
+## Attempt 2 model
 model = tf.keras.Sequential([
     tf.keras.layers.InputLayer(input_shape=input_shape), # input layer - 3 dimensional array of width, height, RGB values
     tf.keras.layers.Conv2D (32, (3, 3), activation="relu", input_shape=input_shape), # 32 filters, 3x3 kernel, ReLu activation function
@@ -58,6 +59,7 @@ model = tf.keras.Sequential([
 I'll be honest - I don't fully understand the 'filters' variable in Conv2D
 My understanding is that the CNN learns and refines the filters in this way - but the sheer number of filters (32) seems like a bit much?
 
+## Attempt 2 results
 Epoch 1/10
 16/16 [==============================] - 1s 10ms/step - loss: 50.6427 - accuracy: 0.7996
 Epoch 2/10
@@ -82,9 +84,10 @@ Epoch 10/10
 
 Much better accuracy. Let's test it on the main dataset.
 
-ATTEMPT 3
+# ATTEMPT 3
 The same network as above, tested on the main dataset
 
+## Attempt 3 results
 Epoch 1/10
 493/493 [==============================] - 5s 9ms/step - loss: 0.4908 - accuracy: 0.5223
 Epoch 2/10
@@ -111,8 +114,9 @@ Actually not too bad. Note that the accuracy on the actual set is significantly 
 
 Let's try adding a second convolution and pooling layer before the flattening, as well as a dropout layer to prevent overfitting
 
-ATTEMPT 4
+# ATTEMPT 4
 
+## Attempt 4 model
     input_shape = (IMG_WIDTH, IMG_HEIGHT, 3)
     model = tf.keras.Sequential([
     tf.keras.layers.InputLayer(input_shape=input_shape), # input layer - 3 dimensional array of width, height, RGB values
@@ -130,6 +134,7 @@ ATTEMPT 4
         metrics=["accuracy"]
     )
 
+# Attempt 4 results
 Epoch 1/10
 493/493 [==============================] - 3s 6ms/step - loss: 0.2387 - accuracy: 0.2020   
 Epoch 2/10
@@ -156,9 +161,10 @@ We see that the final accuracy of the training set is similar to the actual set 
 
 We can still do better though. It looks like it was still continuing to improve with each epoch - let's increase epochs to 15
 
-ATTEMPT 5
+# ATTEMPT 5
 Same code as before but with 15 epochs
 
+## Attempt 5 results
 Epoch 1/15
 493/493 [==============================] - 4s 7ms/step - loss: 0.3172 - accuracy: 0.1250
 Epoch 2/15
