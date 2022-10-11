@@ -6,7 +6,7 @@ import tensorflow as tf
 
 from sklearn.model_selection import train_test_split
 
-EPOCHS = 10
+EPOCHS = 15
 IMG_WIDTH = 30
 IMG_HEIGHT = 30
 NUM_CATEGORIES = 41
@@ -100,10 +100,17 @@ def get_model():
     
     # syntax - keras.Sequential can take a list of keras layers
     # the alternative would be to model.add each layer individually
+    input_shape = (IMG_WIDTH, IMG_HEIGHT, 3)
     model = tf.keras.Sequential([
-    tf.keras.layers.InputLayer(input_shape=(IMG_WIDTH, IMG_HEIGHT, 3)),
-    tf.keras.layers.Flatten(),
-    tf.keras.layers.Dense(NUM_CATEGORIES, activation="sigmoid")])
+    tf.keras.layers.InputLayer(input_shape=input_shape), # input layer - 3 dimensional array of width, height, RGB values
+    tf.keras.layers.Conv2D (16, (3, 3), activation="relu", input_shape=input_shape), # 16 filters, 3x3 kernel, ReLu activation function
+    tf.keras.layers.MaxPooling2D(pool_size=(2, 2)), # pooling
+    tf.keras.layers.Conv2D (32, (3, 3), activation="relu", input_shape=input_shape), # 32 filters, 3x3 kernel, ReLu activation function
+    tf.keras.layers.MaxPooling2D(pool_size=(2, 2)), # pooling
+    tf.keras.layers.Flatten(), # flatten the inputs into a single dimension
+    tf.keras.layers.Dense(128, activation="relu"), # 128 neurons, ReLu activation function for a single deep layer
+    tf.keras.layers.Dropout(0.5), #dropout layer to prevent overfitting
+    tf.keras.layers.Dense(NUM_CATEGORIES, activation="sigmoid")]) # output layer - 41 units, one for each category, sigmoid activation function
     model.compile(
         optimizer="adam",
         loss="binary_crossentropy",

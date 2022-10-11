@@ -328,7 +328,7 @@ def main():
     if assignment is None:
         print("No solution.")
     else:
-        creator.print(assignment)
+        print(assignment)
         if output:
             creator.save(assignment, output)
 
