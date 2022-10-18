@@ -1,6 +1,5 @@
 import nltk
 import sys
-nltk.download('punkt')
 
 TERMINALS = """
 Adj -> "country" | "dreadful" | "enigmatical" | "little" | "moist" | "red"
@@ -15,34 +14,15 @@ V -> "arrived" | "came" | "chuckled" | "had" | "lit" | "said" | "sat"
 V -> "smiled" | "tell" | "were"
 """
 
-"""
-sentence patterns:
-subject + verb
-subject + verb + object
-subject + verb + adverb
-subject + verb + noun
-
-
-Holmes sat down and lit his pipe.
-N V Adv
-
-I had a country walk on Thursday and came home in a dreadful mess.
-N V Det Adj N P N Conj V N P Det Adj N
-
-
-I had a little moist red paint in the palm of my hand.
-N V Det Adj Adj Adj N P Det N P Det N
-
-"""
-
 
 NONTERMINALS = """
-S -> S | S P S
-SC -> NP V | NP V Adv
-AP -> Adj | Adj Adj | Adj Adj Adj
-VT -> V | AP V
-VP -> VT NP
+S -> Chunk | Chunk Runon | Chunk Runon Runon | Chunk Runon Runon Runon
+Runon -> AVP | Conj AVP | Chunk | Conj Chunk
+Chunk -> NP AVP
+VP -> V | V NP | P NP
+AVP -> VP | Adv VP | VP Adv
 NP -> N | Det N | Det AP N
+AP -> Adj | Adj Adj | Adj Adj Adj
 """
 
 grammar = nltk.CFG.fromstring(NONTERMINALS + TERMINALS)
