@@ -1,6 +1,7 @@
 # cs50ai
 
-Completed solutions for [Harvard CS50's Introduction to Artificial Intelligence with Python](https://cs50.harvard.edu/ai/2020/). 
+Completed projects for [Harvard CS50's Introduction to Artificial Intelligence with Python](https://cs50.harvard.edu/ai/2020/). 
+All projects are complete and have received a passing grade.
 
 ## Week 0 - completed
 
@@ -29,3 +30,7 @@ Nim completed
 
 ## Week 5 - completed
 Traffic - completed
+
+## Week 6 - completed
+Parser - completed
+Questions - completed
